@@ -14,13 +14,26 @@ df = pd.read_csv('http://dados.recife.pe.gov.br/dataset/99eea78a-1bd9-4b87-95b8-
                 encoding = 'utf-8',
                 error_bad_lines=False)
 '''
-df = pd.read_csv('data/156diario.csv',
-                sep = ';',
-                header = 0,
-                encoding = 'utf-8',
-                error_bad_lines=False)
 
-df['DATA_DEMANDA_DATE']  =  pd.to_datetime(df['DATA_DEMANDA'], format='%Y-%m-%d')
+df = pd.read_csv('data/sedecsolicitadfcoes.csv', sep = ';', header = 0, encoding = 'utf-8', error_bad_lines=False)
+
+df['solicitacao_date']  =  pd.to_datetime(df['solicitacao_data'], format='%Y-%m-%d')
+
+# count 'solicitacao' by date
+dt = pd.DataFrame(df['solicitacao_date'].value_counts())
+
+# reset index and rename columns
+dt.reset_index(inplace=True)
+dt.columns = ['date', 'n_solicitacao']
+
+# order by date
+dt.sort_values(by='date', inplace=True, ascending=False)
+
+#==========================#
+# APPLICATION
+#========================#
+
+tipo = 'Numero Total de Solicitacoes por dia'
 
 app = dash.Dash()
 
@@ -32,10 +45,10 @@ app.layout = html.Div(children =[
     dcc.Graph(id='example-graph',
                 figure={
                     'data': [
-                        {'x': df.index, 'y': df.Close, 'type': 'line', 'name': stock},
+                        {'x': dt.date, 'y': dt.n_solicitacao, 'type': 'line', 'name': tipo},
                     ],
                     'layout': {
-                        'title': stock
+                        'title': tipo
                     }
                 }
     )
